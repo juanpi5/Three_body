@@ -1,6 +1,5 @@
-using Javis
 using Plots
-
+using LinearAlgebra
 #constants 
 G = 6.6743e-11 
 m1 = 5.972e24
@@ -12,31 +11,26 @@ function distance(pi, pj)
     return r_ij
 end
 
-function forces(r_ij, r_ik, pi, pj, pk, mi, mj, mk)
+function forces(pi, pj, pk, mi, mj, mk)
     #r, distance between two planets 
     #p, position of each planet 
     #m, mass of each planet
-    
-    F = ([
-        G*((mi*mj)*(pj[1]-pi[1])/r_ij^3 + (mi*mk)*(pk[1]-pi[1])/r_ik),
-        G*((mi*mj)*(pj[2]-pi[2])/r_ij^3 + (mi*mk)*(pk[2]-pi[2])/r_ik)
-    ])
+    r_ij = norm(pj-pi)
+    r_ik = norm(pk-pi)
+    F = G*((mi*mj)*(pj-pi)/r_ij^3 + (mi*mk)*(pk-pi)/r_ik^3)
 
 end
 
 function derivatives(t, u)
 
-    #initial conditions
+    #initial conditions:
 
     pos1, pos2, pos3, vel1, vel2, vel3 = u[1:6]
 
-    #distance between centers
-    r12, r13, r23 = distance(pos1, pos2), distance(pos1, pos3), distance(pos2, pos3)
-
     #Forces:
-    F1, F2, F3 = forces(r12, r13, pos1, pos2, pos3, m1, m2, m3), forces(r12, r23, pos2, pos1, pos3, m2, m1, m3), forces(r13, r23, pos3, pos1, pos2, m3, m1, m2)
+    F1, F2, F3 = forces(pos1, pos2, pos3, m1, m2, m3), forces(pos2, pos1, pos3, m2, m1, m3), forces(pos3, pos1, pos2, m3, m1, m2)
 
-    #Accelerations
+    #Accelerations:
     acc1, acc2, acc3 = F1/m1, F2/m2, F3/m3
 
     #derivatives with respect to u
@@ -61,7 +55,11 @@ function Runge_kutta(u, t, dt)
 
 end
 
-#parameters
+
+
+function updated_positions() 
+
+    #parameters
 
     p1 = [1.496e11, 0]
     p2 = [0, 0]
@@ -76,23 +74,33 @@ end
     dt = 0.1
     t_max = 50
 
+    poss_1 = Vector{Array{Float64}}(undef, convert(Int64, t_max/dt))
+    poss_2 = Vector{Array{Float64}}(undef, convert(Int64, t_max/dt))
+    poss_3 = Vector{Array{Float64}}(undef, convert(Int64, t_max/dt))
 
-    for t in t0:t_max
+    for dt in 1:t_max
 
+        poss_1[dt] = copy(u0[1])
+        poss_2[dt] = copy(u0[2])
+        poss_3[dt] = copy(u0[3])
         Runge_kutta(u0, t0, dt)
-        println(u0)
-        println("///////////////////////////////////////////////////////////////////////////////////////////////////////////////")
 
     end
 
+# Running the simulation
+    tp = 0
+    
+    @gif for dt in 1:t_max
 
-#Aqui es donde quedo en ceros, espero y aspiro que el Runge_Kutta este bien hecho, porque si lo está, entonces los valores de la posicion están melos y solo me preocupo por la animación. Yo creo que el usar magnitudes tan grandes me complica bastante la graficación, si sabes como escalarlo y me puedes contar estaría genial. Y pues ya el tema de como usar Plots si lo logré entender de tu código pasado.
-#Me doy cuenta que ignoraste la constante de gravitación en el código, cómo hiciste para que no te afectara? O simplemente dividiste todo por la constante?
+        tp += 1 
 
+            plot(poss_1[1:tp,1], poss_1[1:tp,2], label="m1", xlims=(-5,5), ylims=(-5,5),  linecolor=:red)
+            plot!(poss_2[1:tp,1], poss_2[1:tp,2], label="m2", xlims=(-5,5), ylims=(-5,5), linecolor=:blue)
+            plot!(poss_3[1:tp,1], poss_3[1:tp,2], label="m3", xlims=(-5,5), ylims=(-5,5), linecolor=:green)
+            scatter!([poss_1[tp,1]], [poss_1[tp,2]], label="", xlims=(-5,5), ylims=(-5,5), markercolor=:red)
+            scatter!([poss_2[tp,1]], [poss_2[tp,2]], label="", xlims=(-5,5), ylims=(-5,5), markercolor=:blue)
+            scatter!([poss_3[tp,1]], [poss_3[tp,2]], label="", xlims=(-5,5), ylims=(-5,5), markercolor=:green)
 
-#@gif for i in 1:t_max
-#    plot(u0[1][1]/1e11, u0[1][2]/1e11, label="m1", xlims=(-5, 5), ylims=(-5,5), linecolor=:red)
-#    plot!(u0[2][1]/1e11, u0[2][2]/1e11, label="m2", xlims=(-5, 5), ylims=(-5,5), linecolor=:red)
-#    plot!(u0[3][1]/1e11, u0[3][2]/1e11, label="m3", xlims=(-5, 5), ylims=(-5,5), linecolor=:red)
-#end
+    end
 
+end
