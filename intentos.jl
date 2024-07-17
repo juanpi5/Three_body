@@ -6,56 +6,37 @@ m1 = 5.972e24
 m2 = 7.347e22
 m3 = 1.988e30
 
+function distance(pi, pj)
+    r_ij = sqrt((pj[1]-pi[1])^2 + (pj[2]-pi[2])^2)
+    return r_ij
+end
+
+function forces(r_ij, r_ik, pi, pj, pk, mi, mj, mk)
+    #r, distance between two planets 
+    #p, position of each planet 
+    #m, mass of each planet
+    
+    F = ([
+        G*((mi*mj)*(pj[1]-pi[1])/r_ij^3 + (mi*mk)*(pk[1]-pi[1])/r_ik),
+        G*((mi*mj)*(pj[2]-pi[2])/r_ij^3 + (mi*mk)*(pk[2]-pi[2])/r_ik)
+    ])
+
+end
 
 function derivatives(t, u)
 
     #initial conditions
 
-    pos1 = u[1]
-    pos2 = u[2]
-    pos3 = u[3]
-    vel1 = u[4]
-    vel2 = u[5]
-    vel3 = u[6]
+    pos1, pos2, pos3, vel1, vel2, vel3 = u[1:6]
 
     #distance between centers
-    r12 = sqrt((pos2[1]-pos1[1])^2 + (pos2[2]-pos1[2])^2)
-    r13 = sqrt((pos3[1]-pos1[1])^2 + (pos3[2]-pos1[2])^2)
-    r23 = sqrt((pos3[1]-pos2[1])^2 + (pos3[2]-pos2[2])^2)
-
+    r12, r13, r23 = distance(pos1, pos2), distance(pos1, pos3), distance(pos2, pos3)
 
     #Forces:
-    f12 = [
-        G*(m1*m2)*(pos2[1]-pos1[1])/r12^3,
-        G*(m1*m2)*(pos2[2]-pos1[2])/r12^3
-    ]
-
-    f21 = f12 * -1
-
-    f13 = [
-        G*(m1*m3)*(pos3[1]-pos1[1])/r13^3,
-        G*(m1*m3)*(pos3[2]-pos1[2])/r13^3
-    ]
-
-    f31 = f13 * -1
-
-    f23 = [
-        G*(m2*m3)*(pos3[1]-pos2[1])/r23^3,
-        G*(m2*m3)*(pos3[2]-pos2[2])/r23^3
-    ]
-
-
-    f32 = f23 * -1
-
-    #total forces
-    F1 = f12 + f13
-    F2 = f21 + f23
-    F3 = f31 + f32
+    F1, F2, F3 = forces(r12, r13, pos1, pos2, pos3, m1, m2, m3), forces(r12, r23, pos2, pos1, pos3, m2, m1, m3), forces(r13, r23, pos3, pos1, pos2, m3, m1, m2)
 
     #Accelerations
-    acc1 = F1/m1
-    acc2 = F2/m2
-    acc3 = F3/m3
+    acc1, acc2, acc3 = F1/m1, F2/m2, F3/m3
 
     #derivatives with respect to u
 
@@ -97,5 +78,6 @@ end
     for t in 1:60
         Runge_kutta(u0, t0, dt)
         println(u0)
+        println("//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////")
     end
 
