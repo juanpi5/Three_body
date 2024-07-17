@@ -90,12 +90,12 @@ end
 
     u0 = Vector([p1, p2, p3, v1, v2, v3])
     t0 = 0
-    dt = 5
+    dt = 0.1
     
     
 
     for t in 1:60
         Runge_kutta(u0, t0, dt)
-        println(u0[1])
+        println(u0)
     end
 
