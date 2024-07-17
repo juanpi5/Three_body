@@ -1,4 +1,5 @@
 using Javis
+using Plots
 
 #constants 
 G = 6.6743e-11 
@@ -60,6 +61,7 @@ function Runge_kutta(u, t, dt)
 
 end
 
+#parameters
 
     p1 = [1.496e11, 0]
     p2 = [0, 0]
@@ -72,12 +74,25 @@ end
     u0 = Vector([p1, p2, p3, v1, v2, v3])
     t0 = 0
     dt = 0.1
-    
-    
+    t_max = 50
 
-    for t in 1:60
+
+    for t in t0:t_max
+
         Runge_kutta(u0, t0, dt)
         println(u0)
-        println("//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////")
+        println("///////////////////////////////////////////////////////////////////////////////////////////////////////////////")
+
     end
+
+
+#Aqui es donde quedo en ceros, espero y aspiro que el Runge_Kutta este bien hecho, porque si lo está, entonces los valores de la posicion están melos y solo me preocupo por la animación. Yo creo que el usar magnitudes tan grandes me complica bastante la graficación, si sabes como escalarlo y me puedes contar estaría genial. Y pues ya el tema de como usar Plots si lo logré entender de tu código pasado.
+#Me doy cuenta que ignoraste la constante de gravitación en el código, cómo hiciste para que no te afectara? O simplemente dividiste todo por la constante?
+
+
+#@gif for i in 1:t_max
+#    plot(u0[1][1]/1e11, u0[1][2]/1e11, label="m1", xlims=(-5, 5), ylims=(-5,5), linecolor=:red)
+#    plot!(u0[2][1]/1e11, u0[2][2]/1e11, label="m2", xlims=(-5, 5), ylims=(-5,5), linecolor=:red)
+#    plot!(u0[3][1]/1e11, u0[3][2]/1e11, label="m3", xlims=(-5, 5), ylims=(-5,5), linecolor=:red)
+#end
 
